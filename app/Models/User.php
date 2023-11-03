@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -46,15 +47,18 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function role(){
+    public function role()
+    {
         return $this->belongsTo(Role::class);
     }
 
-    public function buku(){
+    public function buku()
+    {
         return $this->hasMany(Buku::class);
     }
 
-    public function peminjaman(){
+    public function peminjaman()
+    {
         return $this->hasMany(Peminjaman::class);
     }
 }

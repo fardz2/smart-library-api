@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+
 class Peminjaman extends Model
 {
     use HasFactory;
@@ -14,7 +15,8 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function peminjamanBuku(){
-        return $this->belongsToMany(Buku::class,'buku_yang_dipinjam', 'peminjaman_id', 'buku_id')->withTimestamps();
+    public function peminjamanBuku()
+    {
+        return $this->belongsToMany(Buku::class, 'buku_yang_dipinjam', 'peminjaman_id', 'buku_id')->withTimestamps();
     }
 }
