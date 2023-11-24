@@ -15,26 +15,26 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $data = [
             [
-                'role'=>'admin' 
+                'role' => 'admin'
             ],
             [
-                'role'=>'pustakawan' 
+                'role' => 'pustakawan'
             ],
             [
-                'role'=>'pengujung' 
+                'role' => 'pengujung'
             ],
         ];
-        foreach($data as $role){
+        foreach ($data as $role) {
             \App\Models\Role::create(
                 $role
             );
         }
-       
+
         \App\Models\User::create([
             'name' => 'admin',
             'email' => 'admin@gmail.com',
-            'password' => bcrypt('admin123'),
-            'role_id'=> 1
+            'password' => bcrypt('@Admin123'),
+            'role_id' => 1
         ]);
 
         // \App\Models\User::factory()->create([

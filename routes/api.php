@@ -22,11 +22,11 @@ use App\Http\Controllers\User\UserController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('info', [AuthController::class, 'getInfo']);
 Route::get("buku", [BukuController::class, 'index']);
 Route::get("buku/{id}", [BukuController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::get('/info', [AuthController::class, 'getInfo']);
     Route::middleware(['checkrole:admin'])->group(function () {
         Route::get('/role', [RoleController::class, 'index']);
         Route::post('/role', [RoleController::class, 'store']);

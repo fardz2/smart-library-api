@@ -7,15 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255',],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
@@ -51,11 +52,19 @@ class AuthController extends Controller
 
             return response()->json(['data' => $user, 'token' => $token]);
         }
+        return response()->json(['status' => 404, 'message' => "user tidak ada"], 404);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => "berhasil logout"]);
+        return response()->json(['status' => 200, 'message' => "berhasil logout"], 200);
+    }
+
+    public function getInfo(Request $request)
+    {
+        $data = $request->user();
+        $role = $data->role;
+        return response()->json(['status' => 200, 'data' => $role], 200);
     }
 }

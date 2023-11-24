@@ -78,7 +78,7 @@ class BukuController extends Controller
     {
         $buku = Buku::find($id);
         if ($buku == null) {
-            return response()->json(["status" => 404, "message" => "buku tidak ditemukan"], 404);
+            return response()->json(["status" => 404, "message" => "buku tidak ditemukan"]);
         }
         return response()->json(["status" => 200, "data" => $buku], 200);
     }
