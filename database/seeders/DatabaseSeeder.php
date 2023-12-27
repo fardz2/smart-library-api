@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'pustakawan'
             ],
             [
-                'role' => 'pengujung'
+                'role' => 'pengunjung'
             ],
         ];
         foreach ($data as $role) {

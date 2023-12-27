@@ -23,10 +23,12 @@ use App\Http\Controllers\User\UserController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get("buku", [BukuController::class, 'index']);
+Route::get("buku/recommended", [BukuController::class, 'recommended']);
 Route::get("buku/{id}", [BukuController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/info', [AuthController::class, 'getInfo']);
+    Route::put('/info', [AuthController::class, 'updateInfoUser']);
     Route::middleware(['checkrole:admin'])->group(function () {
         Route::get('/role', [RoleController::class, 'index']);
         Route::post('/role', [RoleController::class, 'store']);
@@ -41,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/buku', [BukuController::class, 'store']);
         Route::put('/buku/{id}', [BukuController::class, 'update']);
         Route::delete('/buku/{id}', [BukuController::class, 'destroy']);
+        Route::get('/peminjaman/buku/{id}', [PeminjamanController::class, 'edit']);
     });
     Route::get('/peminjaman', [PeminjamanController::class, 'index']);
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show']);

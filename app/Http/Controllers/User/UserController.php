@@ -5,14 +5,15 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $user = User::get();
+        $user = User::with("role")->get();
+
         return response()->json(["status" => 200, "data" => $user], 200);
     }
     public function show(string $id)
@@ -28,7 +29,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255',],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')],
             'password' => ['required', 'string', 'min:8'],
             'role_id' => ['required'],
         ]);

@@ -24,7 +24,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        "nomor_telepon",
+        "alamat"
     ];
 
     /**
@@ -52,13 +54,18 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function buku()
-    {
-        return $this->hasMany(Buku::class);
-    }
-
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class);
+    }
+    public function canBorrowBook()
+    {
+        $jumlahBukuYangDipinjam = $this->peminjaman()->with('peminjamanBuku')->get()
+            ->pluck('peminjamanBuku')
+            ->flatten()
+            ->where('status', true)
+            ->count();
+
+        return $jumlahBukuYangDipinjam <= 3;
     }
 }

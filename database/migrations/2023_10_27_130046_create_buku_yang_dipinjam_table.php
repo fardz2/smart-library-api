@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('buku_yang_dipinjam', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('peminjaman_id');
+            $table->string('peminjaman_id');
+            $table->foreign('peminjaman_id')->references('peminjaman_id')->on('peminjaman')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('buku_id');
-            $table->timestamps();
-            $table->foreign('peminjaman_id')->references('id')->on('peminjaman')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained();
+            $table->boolean('status')->default(false);
             $table->foreign('buku_id')->references('id')->on('buku')->onUpdate('cascade')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

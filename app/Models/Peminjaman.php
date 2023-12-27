@@ -10,14 +10,16 @@ class Peminjaman extends Model
 {
     use HasFactory;
     protected $table = "peminjaman";
+    protected $primaryKey = 'peminjaman_id';
+    public $incrementing = false;
     protected $guarded = [];
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function peminjamanBuku()
     {
-        return $this->belongsToMany(Buku::class, 'buku_yang_dipinjam', 'peminjaman_id', 'buku_id')->withTimestamps();
+        return $this->belongsToMany(Buku::class, 'buku_yang_dipinjam', 'peminjaman_id', 'buku_id')->withPivot('id', 'user_id', 'status')->withTimestamps();
     }
 }

@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Buku;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-use function Laravel\Prompts\search;
 
 class BukuController extends Controller
 {
@@ -18,13 +19,31 @@ class BukuController extends Controller
     {
         $search = $request->input('search');
         if ($search != null) {
-            $buku = Buku::where('judul_buku', 'like', "%$search%")->get();
+            $buku = Buku::where('judul_buku', 'like', "%$search%")->paginate(10)->withQueryString();
         } else {
-            $buku = Buku::get();
+            $buku = Buku::paginate(10);
         }
 
         return response()->json(["status" => 200, "data" => $buku], 200);
     }
+    public function recommended()
+    {
+
+        $buku = Buku::all()->take(5);
+
+        return response()->json(["status" => 200, "data" => $buku], 200);
+    }
+    // public function getAll(Request $request)
+    // {
+    //     $search = $request->input('search');
+    //     if ($search != null) {
+    //         $buku = Buku::where('judul_buku', 'like', "%$search%")->get();
+    //     } else {
+    //         $buku = Buku::get();
+    //     }
+
+    //     return response()->json(["status" => 200, "data" => $buku], 200);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -32,7 +51,6 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'cover' => ['required'],
             'judul_buku' => ['required'],
             'penerbit' => ['required'],
             'pengarang' => ['required'],
@@ -40,34 +58,67 @@ class BukuController extends Controller
             'tahun_terbit' => ['required'],
             'jumlah_buku' => ['required'],
             'lokasi_rak_buku' => ['required'],
-            'pdf_buku' => ['required']
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
-
-        // // Buat pengguna baru
+        $jumlah_buku = (int)$request->jumlah_buku;
         if ($request->hasFile('cover') && $request->hasFile('pdf_buku')) {
             $cover = $request->file('cover');
             $pdf_buku = $request->file('pdf_buku');
             $path_cover = $cover->store('cover');
             $path_pdf_buku = $pdf_buku->store('buku');
+            Buku::create([
+                'cover' => asset('storage/' . $path_cover),
+                'judul_buku' => Str::title($request->judul_buku),
+                'penerbit' => $request->penerbit,
+                'pengarang' => $request->pengarang,
+                'sinopsis' => $request->sinopsis,
+                'tahun_terbit' => $request->tahun_terbit,
+                'jumlah_buku' =>  $jumlah_buku,
+                'lokasi_rak_buku' => $request->lokasi_rak_buku,
+                'pdf_buku' => asset('storage/' . $path_pdf_buku)
+            ]);
+        } else {
+            if ($request->hasFile('cover')) {
+                $cover = $request->file('cover');
+                $path_cover = $cover->store('cover');
+                Buku::create([
+                    'cover' => asset('storage/' . $path_cover),
+                    'judul_buku' => Str::title($request->judul_buku),
+                    'penerbit' => $request->penerbit,
+                    'pengarang' => $request->pengarang,
+                    'sinopsis' => $request->sinopsis,
+                    'tahun_terbit' => $request->tahun_terbit,
+                    'jumlah_buku' =>  $jumlah_buku,
+                    'lokasi_rak_buku' => $request->lokasi_rak_buku,
+                ]);
+            } else if ($request->hasFile('pdf_buku')) {
+                $pdf_buku = $request->file('pdf_buku');
+                $path_pdf_buku = $pdf_buku->store('buku');
+                Buku::create([
+                    'judul_buku' => Str::title($request->judul_buku),
+                    'penerbit' => $request->penerbit,
+                    'pengarang' => $request->pengarang,
+                    'sinopsis' => $request->sinopsis,
+                    'tahun_terbit' => $request->tahun_terbit,
+                    'jumlah_buku' =>  $jumlah_buku,
+                    'lokasi_rak_buku' => $request->lokasi_rak_buku,
+                    'pdf_buku' => asset('storage/' . $path_pdf_buku)
+                ]);
+            } else {
+                Buku::create([
+                    'judul_buku' => Str::title($request->judul_buku),
+                    'penerbit' => $request->penerbit,
+                    'pengarang' => $request->pengarang,
+                    'sinopsis' => $request->sinopsis,
+                    'tahun_terbit' => $request->tahun_terbit,
+                    'jumlah_buku' =>  $jumlah_buku,
+                    'lokasi_rak_buku' => $request->lokasi_rak_buku,
+                ]);
+            }
         }
-
-        Buku::create([
-            'cover' => asset('storage/' . $path_cover),
-            'user_id' => $request->user()->id,
-            'judul_buku' => $request->judul_buku,
-            'penerbit' => $request->penerbit,
-            'pengarang' => $request->pengarang,
-            'sinopsis' => $request->sinopsis,
-            'tahun_terbit' => $request->tahun_terbit,
-            'jumlah_buku' => $request->jumlah_buku,
-            'lokasi_rak_buku' => $request->lokasi_rak_buku,
-            'pdf_buku' => asset('storage/' . $path_pdf_buku)
-        ]);
         return response()->json(["status" => 200, "message" => "buku berhasil ditambahkan"]);
     }
 
@@ -93,7 +144,6 @@ class BukuController extends Controller
             return response()->json(["status" => 404, "message" => "buku tidak ditemukan"], 404);
         }
         $validator = Validator::make($request->all(), [
-            'cover' => ['required'],
             'judul_buku' => ['required'],
             'penerbit' => ['required'],
             'pengarang' => ['required'],
@@ -101,26 +151,15 @@ class BukuController extends Controller
             'tahun_terbit' => ['required'],
             'jumlah_buku' => ['required'],
             'lokasi_rak_buku' => ['required'],
-            'pdf_buku' => ['required']
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+        $cover = Str::after($buku->cover, 'storage/');
+        $pdf = Str::after($buku->pdf_buku, 'storage/');
 
-
-        // // Buat pengguna baru
-        if ($request->hasFile('cover') && $request->hasFile('pdf_buku')) {
-            $cover = $request->file('cover');
-            $pdf_buku = $request->file('pdf_buku');
-            $path_cover = $cover->store('cover');
-            $path_pdf_buku = $pdf_buku->store('buku');
-        }
-
-
-        $buku->update([
-            'cover' => asset('storage/' . $path_cover),
-            'user_id' => $request->user()->id,
+        $dataBuku = [
             'judul_buku' => $request->judul_buku,
             'penerbit' => $request->penerbit,
             'pengarang' => $request->pengarang,
@@ -128,8 +167,28 @@ class BukuController extends Controller
             'tahun_terbit' => $request->tahun_terbit,
             'jumlah_buku' => $request->jumlah_buku,
             'lokasi_rak_buku' => $request->lokasi_rak_buku,
-            'pdf_buku' => asset('storage/' . $path_pdf_buku)
-        ]);
+        ];
+        if ($request->hasFile('cover') && $request->hasFile('pdf_buku')) {
+            Storage::delete([$cover, $pdf]);
+            $cover = $request->file('cover');
+            $pdf_buku = $request->file('pdf_buku');
+            $path_cover = $cover->store('cover');
+            $path_pdf_buku = $pdf_buku->store('buku');
+            $dataBuku['cover'] = asset('storage/' . $path_cover);
+            $dataBuku['pdf_buku'] = asset('storage/' . $path_pdf_buku);
+        } else if ($request->hasFile('cover')) {
+            Storage::delete([$cover]);
+            $cover = $request->file('cover');
+            $path_cover = $cover->store('cover');
+            $dataBuku['cover'] = asset('storage/' . $path_cover);
+        } else if ($request->hasFile('pdf_buku')) {
+            Storage::delete([$pdf]);
+            $pdf_buku = $request->file('pdf_buku');
+            $path_pdf_buku = $pdf_buku->store('buku');
+            $dataBuku['pdf_buku'] = asset('storage/' . $path_pdf_buku);
+        }
+
+        $buku->update($dataBuku);
         return response()->json(["status" => 200, "message" => "buku berhasil diedit"], 200);
     }
 
@@ -141,6 +200,13 @@ class BukuController extends Controller
         $buku = Buku::find($id);
         if ($buku == null) {
             return response()->json(["status" => 404, "message" => "buku tidak ditemukan"], 404);
+        }
+
+        $cover = Str::after($buku->cover, 'storage/');
+        $pdf = Str::after($buku->pdf_buku, 'storage/');
+
+        if ($cover && $pdf) {
+            Storage::delete([$cover, $pdf]);
         }
         $buku->delete();
         return response()->json(["status" => 200, "message" => "buku berhasil dihapus"], 200);
