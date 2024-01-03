@@ -14,28 +14,28 @@ Ikuti langkah-langkah berikut untuk menyiapkan dan menjalankan api laravel smart
     composer install
     ```
 
-3. run
+3. run:
 
     ```bash
     cp .env.example .env
     ```
 
-4. run
+4. run:
 
     ```bash
     php artisan key:generate
     ```
 
-5. run
+5. run:
 
     ```bash
     php artisan migrate:refresh --seed
     ```
 
-6. run
+6. run:
 
     ```bash
     php artisan serve
     ```
 
-Akses http://127.0.0.1:8000
+Server dapat diakses di 127.0.0.1:8000
