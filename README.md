@@ -1,31 +1,44 @@
 # Cara Menjalankan Proyek Laravel
 
-Ikuti langkah-langkah berikut untuk menyiapkan dan menjalankan proyek Laravel:
+Ikuti langkah-langkah berikut untuk menyiapkan dan menjalankan api laravel smart-library:
 
-1. clonw repository:
+1. clone repository:
 
-    ```bash
-    git clone <my-cool-project>
-    ```
+`````bash
+   git clone <my-cool-project>
+```
 
-2. ```bash
-   composer install
-   ```
+2. run:
 
-3. ```bash
+````bash
+  composer install
+```
+
+3. run
+
+```bash
    cp .env.example .env
 
-   ```
+```
 
-4. ```bash
+4. run
+
+```bash
    php artisan key:generate
-   ```
+```
 
-5. ```bash
+5. run
+
+```bash
    php artisan migrate:refresh --seed
-   ```
+```
 
-6. ```bash'
+6. run
+
+```bash
    php artisan serve
 
-   ```
+```
+
+Akses http://127.0.0.1:8000
+`````
