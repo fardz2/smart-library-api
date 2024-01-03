@@ -5,7 +5,7 @@ Ikuti langkah-langkah berikut untuk menyiapkan dan menjalankan api laravel smart
 1. clone repository:
 
     ```bash
-    git clone <my-cool-project>
+    git clone <this project>
     ```
 
 2. run:
