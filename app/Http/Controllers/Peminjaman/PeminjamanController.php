@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\BukuYangDipinjam;
-
+use App\Models\Buku;
 
 
 class PeminjamanController extends Controller
@@ -20,7 +20,12 @@ class PeminjamanController extends Controller
         $search = $request->input('search');
 
         if ($user->role->role == "admin" || $user->role->role == "pustakawan") {
-            $peminjaman = Peminjaman::with('peminjamanBuku', 'user')
+            $peminjaman = $peminjaman = Peminjaman::with([
+                'peminjamanBuku' => function ($query) {
+                    $query->withTrashed(); // Include soft-deleted records in the relationship
+                },
+                'user'
+            ])
                 ->orderByDesc('created_at');
             if ($search) {
                 $peminjaman->where('peminjaman_id', 'like', "%$search%");
@@ -45,15 +50,18 @@ class PeminjamanController extends Controller
                 ], 200);
             }
         } else {
-            $peminjaman = $user->peminjaman()->with('peminjamanBuku')
-                ->orderByDesc('created_at');
+            $peminjaman = $user->peminjaman()->with([
+                'peminjamanBuku' => function ($query) {
+                    $query->withTrashed(); // Include soft-deleted records in the relationship
+                }
+            ])->orderByDesc('created_at');
             if ($search) {
                 $peminjaman->where('peminjaman_id', 'like', "%$search%");
             }
             $peminjaman = $peminjaman->paginate(5)->withQueryString();
             foreach ($peminjaman as $peminjam) {
                 // Check if any buku_yang_dipinjam related to this peminjaman has status = true
-                // Check if any buku_yang_dipinjam related to this peminjaman has status = true
+
                 if ($peminjam->status == false) {
                     $statusBukuDipinjam = $peminjam->peminjamanBuku->contains(function ($buku) {
                         return $buku->pivot->status == true;
@@ -90,6 +98,23 @@ class PeminjamanController extends Controller
                 "message" => "Anda harus mengembalikan setidaknya satu buku sebelum melakukan peminjaman baru.",
             ], 200);
         }
+        foreach ($request->buku as $buku) {
+            $buku_ditemukan = Buku::find($buku);
+
+            if ($buku_ditemukan == null) {
+                return response()->json([
+                    "status" => 404,
+                    "message" => "Anda harus mengembalikan setidaknya satu buku sebelum melakukan peminjaman baru.",
+                ], 404);
+            }
+            if ($buku_ditemukan->jumlah_buku == 0) {
+                return response()->json([
+                    "status" => "stok buku",
+                    "message" => "Stok buku dari" . $buku_ditemukan->judul_buku . " habis",
+                ], 200);
+            }
+            $buku_ditemukan->update(["jumlah_buku" => $buku_ditemukan->jumlah_buku - 1]);
+        }
         $tanggalPengembalian = Carbon::now()->addWeek();
 
         $smt = 'SMT';
@@ -105,6 +130,7 @@ class PeminjamanController extends Controller
             'tanggal_pengembalian' => $tanggalPengembalian,
         ]);
 
+
         $peminjaman->peminjamanBuku()->attach($request->buku, ['user_id' => $userId]);
 
         return response()->json([
@@ -114,14 +140,15 @@ class PeminjamanController extends Controller
     }
     public function show(string $id)
     {
-        $peminjaman = Peminjaman::find($id);
+        $peminjaman = Peminjaman::with(['peminjamanBuku' => function ($query) {
+            $query->withTrashed(); // Include soft-deleted records in the relationship
+        }])->findOrFail($id);
         if ($peminjaman == null) {
             return response()->json([
                 "status" => 404,
                 "message" => "tidak ditemukan"
             ], 200);
         }
-        $peminjaman->peminjamanBuku;
         return response()->json([
             "status" => 200,
             "data" => $peminjaman
@@ -137,6 +164,8 @@ class PeminjamanController extends Controller
                 "message" => "tidak ditemukan"
             ], 200);
         }
+        $buku = Buku::withTrashed()->findOrFail($buku_yang_dipinjam->buku_id);
+        $buku->update(["jumlah_buku" => $buku->jumlah_buku + 1]);
         $buku_yang_dipinjam->update(["status" => true]);
         return response()->json([
             "status" => 200,

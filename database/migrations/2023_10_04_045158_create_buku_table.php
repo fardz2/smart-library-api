@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('lokasi_rak_buku');
             $table->string("pdf_buku")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

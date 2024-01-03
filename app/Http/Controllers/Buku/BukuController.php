@@ -18,10 +18,19 @@ class BukuController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+
         if ($search != null) {
-            $buku = Buku::where('judul_buku', 'like', "%$search%")->paginate(10)->withQueryString();
+            // Menampilkan data pencarian yang tidak di-soft delete
+            $buku = Buku::where('judul_buku', 'like', "%$search%")
+                ->whereNull('deleted_at')
+                ->paginate(10)
+                ->withQueryString();
+
+            if ($buku->isEmpty()) {
+                return response()->json(["status" => 404, "message" => "Buku tidak ditemukan"], 200);
+            }
         } else {
-            $buku = Buku::paginate(10);
+            $buku = Buku::whereNull('deleted_at')->paginate(10);
         }
 
         return response()->json(["status" => 200, "data" => $buku], 200);
@@ -202,12 +211,12 @@ class BukuController extends Controller
             return response()->json(["status" => 404, "message" => "buku tidak ditemukan"], 404);
         }
 
-        $cover = Str::after($buku->cover, 'storage/');
-        $pdf = Str::after($buku->pdf_buku, 'storage/');
+        // $cover = Str::after($buku->cover, 'storage/');
+        // $pdf = Str::after($buku->pdf_buku, 'storage/');
 
-        if ($cover && $pdf) {
-            Storage::delete([$cover, $pdf]);
-        }
+        // if ($cover && $pdf) {
+        //     Storage::delete([$cover, $pdf]);
+        // }
         $buku->delete();
         return response()->json(["status" => 200, "message" => "buku berhasil dihapus"], 200);
     }

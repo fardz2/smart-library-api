@@ -28,6 +28,23 @@ class PeminjamanControllerTest extends TestCase
         ])->post('/api/peminjaman', $dataPeminjaman);
         $insertResponse->assertStatus(200);
     }
+    public function test_peminjaman_buku_invalid(): void
+    {
+        $data = [
+            'email' => 'john.doe2@example.com',
+            'password' => '@JohnDoe123',
+        ];
+        $login_response = $this->POST('/api/login', $data);
+        $accessToken = $login_response['token']; // Menangkap access token
+
+        $dataPeminjaman = [
+            "buku" => [1]
+        ];
+        $insertResponse = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+        ])->post('/api/peminjaman', $dataPeminjaman);
+        $insertResponse->assertStatus(404);
+    }
 
     public function test_pengembalian_buku(): void
     {

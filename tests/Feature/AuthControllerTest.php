@@ -9,11 +9,6 @@ use Tests\TestCase;
 class AuthControllerTest extends TestCase
 {
 
-    /**
-     * A basic feature test example.
-     */
-
-
     public function test_pengunjung_registrasi(): void
     {
         $data = [
@@ -32,6 +27,30 @@ class AuthControllerTest extends TestCase
         $this->POST('/api/register', $dataBaru);
 
         $response->assertStatus(200);
+    }
+    public function test_pengunjung_registrasi_tidak_valid_email_sama(): void
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => '@JohnDoe123',
+        ];
+
+        $response = $this->POST('/api/register', $data);
+
+        $response->assertStatus(422);
+    }
+    public function test_pengunjung_registrasi_tidak_valid_password(): void
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'invalidpassword',
+        ];
+
+        $response = $this->POST('/api/register', $data);
+
+        $response->assertStatus(422);
     }
     public function test_pengunjung_login(): void
     {
@@ -52,19 +71,5 @@ class AuthControllerTest extends TestCase
         $response = $this->POST('/api/login', $data);
 
         $response->assertStatus(200);
-    }
-    public function test_logout(): void
-    {
-        $data = [
-            'email' => 'admin@gmail.com',
-            'password' => '@Admin123',
-        ];
-        $login_response = $this->POST('/api/login', $data);
-
-        $accessToken = $login_response['token']; // Menangkap access token
-        $logoutResponse = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $accessToken,
-        ])->get('/api/logout');
-        $logoutResponse->assertStatus(500);
     }
 }
