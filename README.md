@@ -4,41 +4,44 @@ Ikuti langkah-langkah berikut untuk menyiapkan dan menjalankan api laravel smart
 
 1. clone repository:
 
-`````bash
-   git clone <my-cool-project>
-```
+    ````bash
+    git clone <my-cool-project>
+    ```
+
+    ````
 
 2. run:
 
-````bash
-  composer install
-```
+    ````bash
+    composer install
+    ```
+
+    ````
 
 3. run
 
-```bash
-   cp .env.example .env
+    ```bash
+    cp .env.example .env
 
-```
+    ```
 
 4. run
 
-```bash
-   php artisan key:generate
-```
+    ```bash
+    php artisan key:generate
+    ```
 
 5. run
 
-```bash
-   php artisan migrate:refresh --seed
-```
+    ```bash
+    php artisan migrate:refresh --seed
+    ```
 
 6. run
 
-```bash
-   php artisan serve
+    ```bash
+    php artisan serve
 
-```
+    ```
 
 Akses http://127.0.0.1:8000
-`````
